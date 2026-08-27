@@ -4,8 +4,8 @@
 
 Danilo M. Silva — a Frontend Engineer with 6+ years in React and TypeScript,
 deliberately expanding into full-stack development. This is Phase 1 of a structured
-learning roadmap. The priority is to learn backend fundamentals properly, not to
-ship fast with shortcuts.
+12-month engineering growth roadmap. The priority is to learn backend fundamentals
+properly, not to ship fast with shortcuts.
 
 ## Learning goals (in order of priority)
 
@@ -30,7 +30,26 @@ that stay close to the underlying concepts.
 - **Linting:** ESLint + Prettier
 - **Deployment:** Docker + Railway or Fly.io
 
-## Phase 1 milestones
+---
+
+## Phase 1 — Backend fundamentals (8 weeks)
+
+Build this API: a production-quality job application tracker, live and deployed.
+**Target: backend deployed within 8 weeks.**
+
+| Stage | Weeks | Outcome |
+| ----- | ----- | ------- |
+| 1. Scaffold           | 1   | TypeScript strict, ESLint + Prettier, Hono server running, `/health` endpoint |
+| 2. Data layer         | 2   | PostgreSQL connected, Drizzle + first migration, `users` & `applications` schema |
+| 3. Auth               | 3–4 | `register` / `login` / `refresh` / `logout`, bcrypt, JWT, guard middleware, tests |
+| 4. Applications CRUD  | 4–5 | All five endpoints, Zod validation on every body, ownership checks, tests |
+| 5. List refinements   | 6   | Filtering, sorting, pagination on `GET /applications`, tests |
+| 6. Hardening          | 7   | Unified error response shape, request logging, rate limiting, full test pass, CI |
+| 7. Deploy             | 8   | Docker image, Railway / Fly.io, env config, production smoke test |
+
+See [`API.md`](API.md) for the domain model and endpoint contracts.
+
+### Checklist
 
 - [ ] Repo created
 - [ ] Project scaffolded (TypeScript, ESLint, Prettier)
@@ -44,9 +63,21 @@ that stay close to the underlying concepts.
 - [ ] Docker
 - [ ] Deployed to Railway / Fly.io
 
-## Broader context
+---
 
-This project is part of a 12-month engineering growth roadmap.
+## Phase 2 — Frontend (React + TypeScript)
 
-- **Phase 1 target:** backend live and deployed within 8 weeks.
-- The frontend (React + TypeScript) will be built separately once the API is solid.
+_Placeholder — to be detailed once Phase 1 is deployed._
+
+A separate repo. A React + TypeScript client that consumes this API: auth flow
+with token refresh, the applications list with filtering/sorting/pagination wired
+to the API, and create/edit/detail views for an application.
+
+---
+
+## Phase 3 — Full-stack & advanced topics
+
+_Placeholder — to be detailed later._
+
+Candidate areas: end-to-end deployment of both halves, caching, background jobs,
+observability (structured logs, metrics, tracing), and CI/CD hardening.
