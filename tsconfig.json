@@ -28,6 +28,6 @@
     "resolveJsonModule": true,
     "skipLibCheck": true
   },
-  "include": ["src/**/*", "vitest.config.ts"],
+  "include": ["src/**/*", "vitest.config.ts", "drizzle.config.ts"],
   "exclude": ["node_modules", "dist"]
 }
