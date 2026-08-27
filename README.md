@@ -10,16 +10,30 @@ and [`docs/API.md`](docs/API.md) for the domain model and endpoint contracts.
 
 - **Node.js 24+** (`.nvmrc` pins the major version — run `nvm use`)
 - npm 10+
-
-PostgreSQL is not required yet; it arrives in Stage 2 of the roadmap.
+- **Docker** (Docker Desktop on Windows/macOS) for the local PostgreSQL container
 
 ## Getting started
 
 ```bash
 npm install
 cp .env.example .env
+docker compose up -d       # start PostgreSQL 16
 npm run dev
 ```
+
+## Database
+
+A local PostgreSQL 16 runs in Docker (see `docker-compose.yml`).
+
+```bash
+docker compose up -d       # start in the background
+docker compose down        # stop, keep data
+docker compose down -v     # stop and wipe the data volume
+```
+
+On first start it creates two databases: `job_hunt` (development) and
+`job_hunt_test` (used by the integration tests). The connection string lives in
+`.env` as `DATABASE_URL`.
 
 The server starts on `http://localhost:3000`. Check it:
 
