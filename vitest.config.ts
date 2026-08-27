@@ -6,6 +6,7 @@ export default defineConfig({
     include: ['src/**/*.test.ts'],
     env: {
       NODE_ENV: 'test',
+      DATABASE_URL: 'postgres://postgres:postgres@localhost:5432/job_hunt_test',
     },
   },
 });

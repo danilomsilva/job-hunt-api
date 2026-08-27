@@ -9,7 +9,20 @@ import { z } from 'zod';
 const envSchema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
   PORT: z.coerce.number().int().positive().max(65535).default(3000),
+
+  // Required — there is no sensible default for a database connection.
+  DATABASE_URL: z.string().refine(isPostgresUrl, {
+    message: 'must be a PostgreSQL connection string, e.g. postgres://user:pass@host:5432/db',
+  }),
 });
+
+function isPostgresUrl(value: string): boolean {
+  try {
+    return ['postgres:', 'postgresql:'].includes(new URL(value).protocol);
+  } catch {
+    return false;
+  }
+}
 
 const parsed = envSchema.safeParse(process.env);
 
