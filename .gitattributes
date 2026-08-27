@@ -1,0 +1,5 @@
+# Normalise line endings: store and check out with LF everywhere.
+* text=auto eol=lf
+
+# Keep the lockfile out of diffs by default.
+package-lock.json -diff linguist-generated

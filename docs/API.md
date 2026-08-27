@@ -20,22 +20,22 @@ and follow RESTful status-code conventions.
 
 ### Auth
 
-| Method & path        | Description                             |
-| -------------------- | -------------------------------------- |
-| `POST /auth/register` | Create account                         |
-| `POST /auth/login`    | Returns access + refresh tokens        |
-| `POST /auth/refresh`  | Refresh access token                   |
-| `POST /auth/logout`   | Invalidate refresh token               |
+| Method & path         | Description                     |
+| --------------------- | ------------------------------- |
+| `POST /auth/register` | Create account                  |
+| `POST /auth/login`    | Returns access + refresh tokens |
+| `POST /auth/refresh`  | Refresh access token            |
+| `POST /auth/logout`   | Invalidate refresh token        |
 
 ### Applications
 
-| Method & path              | Description                                   |
-| -------------------------- | -------------------------------------------- |
-| `GET /applications`        | List with filtering, sorting, pagination     |
-| `POST /applications`       | Create                                       |
-| `GET /applications/:id`    | Get one                                      |
-| `PATCH /applications/:id`  | Update (status, notes, etc.)                 |
-| `DELETE /applications/:id` | Delete                                       |
+| Method & path              | Description                              |
+| -------------------------- | ---------------------------------------- |
+| `GET /applications`        | List with filtering, sorting, pagination |
+| `POST /applications`       | Create                                   |
+| `GET /applications/:id`    | Get one                                  |
+| `PATCH /applications/:id`  | Update (status, notes, etc.)             |
+| `DELETE /applications/:id` | Delete                                   |
 
 ## Conventions to enforce
 

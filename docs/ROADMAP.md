@@ -37,15 +37,15 @@ that stay close to the underlying concepts.
 Build this API: a production-quality job application tracker, live and deployed.
 **Target: backend deployed within 8 weeks.**
 
-| Stage | Weeks | Outcome |
-| ----- | ----- | ------- |
-| 1. Scaffold           | 1   | TypeScript strict, ESLint + Prettier, Hono server running, `/health` endpoint |
-| 2. Data layer         | 2   | PostgreSQL connected, Drizzle + first migration, `users` & `applications` schema |
-| 3. Auth               | 3–4 | `register` / `login` / `refresh` / `logout`, bcrypt, JWT, guard middleware, tests |
-| 4. Applications CRUD  | 4–5 | All five endpoints, Zod validation on every body, ownership checks, tests |
-| 5. List refinements   | 6   | Filtering, sorting, pagination on `GET /applications`, tests |
-| 6. Hardening          | 7   | Unified error response shape, request logging, rate limiting, full test pass, CI |
-| 7. Deploy             | 8   | Docker image, Railway / Fly.io, env config, production smoke test |
+| Stage                | Weeks | Outcome                                                                           |
+| -------------------- | ----- | --------------------------------------------------------------------------------- |
+| 1. Scaffold          | 1     | TypeScript strict, ESLint + Prettier, Hono server running, `/health` endpoint     |
+| 2. Data layer        | 2     | PostgreSQL connected, Drizzle + first migration, `users` & `applications` schema  |
+| 3. Auth              | 3–4   | `register` / `login` / `refresh` / `logout`, bcrypt, JWT, guard middleware, tests |
+| 4. Applications CRUD | 4–5   | All five endpoints, Zod validation on every body, ownership checks, tests         |
+| 5. List refinements  | 6     | Filtering, sorting, pagination on `GET /applications`, tests                      |
+| 6. Hardening         | 7     | Unified error response shape, request logging, rate limiting, full test pass, CI  |
+| 7. Deploy            | 8     | Docker image, Railway / Fly.io, env config, production smoke test                 |
 
 See [`API.md`](API.md) for the domain model and endpoint contracts.
 
