@@ -24,14 +24,17 @@
   },
   "dependencies": {
     "@hono/node-server": "^2.1.1",
+    "bcryptjs": "^3.0.3",
     "dotenv": "^17.4.2",
     "drizzle-orm": "^0.45.2",
     "hono": "^4.13.5",
+    "jsonwebtoken": "^9.0.3",
     "pg": "^8.23.0",
     "zod": "^4.4.3"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^26.4.0",
     "@types/pg": "^8.23.1",
     "drizzle-kit": "^0.31.10",
