@@ -14,6 +14,11 @@ const envSchema = z.object({
   DATABASE_URL: z.string().refine(isPostgresUrl, {
     message: 'must be a PostgreSQL connection string, e.g. postgres://user:pass@host:5432/db',
   }),
+
+  // Required — signs and verifies access tokens. No sensible default.
+  JWT_SECRET: z.string().min(32, 'must be at least 32 characters'),
+  JWT_ACCESS_TTL: z.string().default('15m'),
+  JWT_REFRESH_TTL_DAYS: z.coerce.number().int().positive().default(30),
 });
 
 function isPostgresUrl(value: string): boolean {
