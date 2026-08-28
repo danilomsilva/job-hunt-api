@@ -20,7 +20,7 @@ import {
 import { parseBody } from '../lib/validate.js';
 
 const credentialsSchema = z.object({
-  email: z.string().email(),
+  email: z.email(),
   // bcrypt silently truncates beyond 72 bytes — cap well under that.
   password: z.string().min(8).max(72),
 });
