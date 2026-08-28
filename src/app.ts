@@ -8,6 +8,7 @@ import { Hono } from 'hono';
 import { logger } from 'hono/logger';
 import { requestId } from 'hono/request-id';
 import { errorHandler, notFoundHandler } from './middleware/error-handler.js';
+import { authRoutes } from './routes/auth.js';
 
 export function createApp(): Hono {
   const app = new Hono();
@@ -21,6 +22,8 @@ export function createApp(): Hono {
       timestamp: new Date().toISOString(),
     });
   });
+
+  app.route('/auth', authRoutes);
 
   app.notFound(notFoundHandler);
   app.onError(errorHandler);
