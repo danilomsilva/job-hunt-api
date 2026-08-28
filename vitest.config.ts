@@ -7,6 +7,10 @@ export default defineConfig({
     env: {
       NODE_ENV: 'test',
       DATABASE_URL: 'postgres://postgres:postgres@localhost:5432/job_hunt_test',
+      JWT_SECRET: 'test-secret-do-not-use-in-production-min-32-chars',
+      JWT_ACCESS_TTL: '15m',
+      JWT_REFRESH_TTL_DAYS: '30',
     },
+    setupFiles: ['./src/test/setup.ts'],
   },
 });
