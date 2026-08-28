@@ -39,12 +39,12 @@ This is a learning project — the goal is a production-quality backend built fr
 
 ## Current status
 
-- [ ] Repo created
-- [ ] Project scaffolded (TypeScript, ESLint, Prettier)
-- [ ] Hono + basic server running
-- [ ] PostgreSQL connected
-- [ ] Drizzle ORM set up with first migration
-- [ ] Auth endpoints (register, login, refresh, logout)
+- [x] Repo created
+- [x] Project scaffolded (TypeScript, ESLint, Prettier)
+- [x] Hono + basic server running
+- [x] PostgreSQL connected
+- [x] Drizzle ORM set up with first migration
+- [x] Auth endpoints (register, login, refresh, logout)
 - [ ] Applications CRUD
 - [ ] Filtering, sorting, pagination
 - [ ] Integration tests
