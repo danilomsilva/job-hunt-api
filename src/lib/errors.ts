@@ -56,9 +56,9 @@ export class ConflictError extends AppError {
   }
 }
 
-/** 422 — the request was well-formed but failed validation. */
+/** 400 — the request was well-formed but failed validation. */
 export class ValidationError extends AppError {
   constructor(message = 'The request payload failed validation', details?: unknown) {
-    super(422, 'VALIDATION_ERROR', message, details);
+    super(400, 'VALIDATION_ERROR', message, details);
   }
 }
