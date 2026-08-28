@@ -12,5 +12,9 @@ export default defineConfig({
       JWT_REFRESH_TTL_DAYS: '30',
     },
     setupFiles: ['./src/test/setup.ts'],
+    // setup.ts truncates shared tables in a real Postgres instance after every
+    // test — running files in parallel lets one file's cleanup race another
+    // file's in-progress inserts against that same database.
+    fileParallelism: false,
   },
 });
