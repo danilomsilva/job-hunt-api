@@ -29,13 +29,17 @@ const refreshSchema = z.object({
   refreshToken: z.string().min(1),
 });
 
+function pgErrorCode(err: unknown): string | undefined {
+  if (typeof err !== 'object' || err === null) return undefined;
+  const record = err as Record<string, unknown>;
+  // node-postgres errors carry `code` directly; drizzle-orm wraps them in its
+  // own Error with the original attached as `cause`.
+  const code = record['code'] ?? pgErrorCode(record['cause']);
+  return typeof code === 'string' ? code : undefined;
+}
+
 function isUniqueViolation(err: unknown): boolean {
-  return (
-    typeof err === 'object' &&
-    err !== null &&
-    'code' in err &&
-    (err as Record<string, unknown>)['code'] === '23505'
-  );
+  return pgErrorCode(err) === '23505';
 }
 
 async function issueTokenPair(userId: string) {
