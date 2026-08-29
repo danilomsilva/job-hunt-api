@@ -16,7 +16,7 @@ import { parseBody } from '../lib/validate.js';
 const applicationFields = z.object({
   company: z.string().min(1),
   role: z.string().min(1),
-  status: z.enum(applicationStatus.enumValues).default('wishlist'),
+  status: z.enum(applicationStatus.enumValues),
   location: z.string().min(1).nullish(),
   jobUrl: z.url().nullish(),
   salaryMin: z.number().int().nonnegative().nullish(),
@@ -38,7 +38,12 @@ const salaryRangeIssue = {
   path: ['salaryMin'],
 };
 
-const createApplicationSchema = applicationFields.refine(salaryRangeValid, salaryRangeIssue);
+// The default only belongs on create — applying it on the shared field set
+// would make .partial() fill in `status` on an empty update body, defeating
+// the "at least one field" check below.
+const createApplicationSchema = applicationFields
+  .extend({ status: z.enum(applicationStatus.enumValues).default('wishlist') })
+  .refine(salaryRangeValid, salaryRangeIssue);
 
 const updateApplicationSchema = applicationFields
   .partial()
