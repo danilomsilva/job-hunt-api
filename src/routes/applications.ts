@@ -14,16 +14,16 @@ import { NotFoundError } from '../lib/errors.js';
 import { requireAuth } from '../middleware/auth.js';
 
 const applicationFields = z.object({
-  company: z.string().min(1),
-  role: z.string().min(1),
-  status: z.enum(applicationStatus.enumValues),
-  location: z.string().min(1).nullish(),
-  jobUrl: z.url().nullish(),
-  salaryMin: z.number().int().nonnegative().nullish(),
-  salaryMax: z.number().int().nonnegative().nullish(),
-  salaryCurrency: z.string().length(3).nullish(),
-  notes: z.string().nullish(),
-  appliedAt: z.coerce.date().nullish(),
+  company: z.string().min(1).openapi({ example: 'Acme Corp' }),
+  role: z.string().min(1).openapi({ example: 'Backend Engineer' }),
+  status: z.enum(applicationStatus.enumValues).openapi({ example: 'applied' }),
+  location: z.string().min(1).nullish().openapi({ example: 'Remote' }),
+  jobUrl: z.url().nullish().openapi({ example: 'https://example.com/jobs/123' }),
+  salaryMin: z.number().int().nonnegative().nullish().openapi({ example: 90000 }),
+  salaryMax: z.number().int().nonnegative().nullish().openapi({ example: 130000 }),
+  salaryCurrency: z.string().length(3).nullish().openapi({ example: 'USD' }),
+  notes: z.string().nullish().openapi({ example: 'Referred by a friend' }),
+  appliedAt: z.coerce.date().nullish().openapi({ example: '2026-08-01T00:00:00.000Z' }),
 });
 
 function salaryRangeValid(v: {
@@ -42,7 +42,12 @@ const salaryRangeIssue = {
 // would make .partial() fill in `status` on an empty update body, defeating
 // the "at least one field" check below.
 const createApplicationSchema = applicationFields
-  .extend({ status: z.enum(applicationStatus.enumValues).default('wishlist') })
+  .extend({
+    status: z
+      .enum(applicationStatus.enumValues)
+      .default('wishlist')
+      .openapi({ example: 'wishlist' }),
+  })
   .refine(salaryRangeValid, salaryRangeIssue);
 
 const updateApplicationSchema = applicationFields
@@ -51,29 +56,32 @@ const updateApplicationSchema = applicationFields
   .refine(salaryRangeValid, salaryRangeIssue);
 
 const listQuerySchema = z.object({
-  status: z.enum(applicationStatus.enumValues).optional(),
-  company: z.string().min(1).optional(),
-  sortBy: z.enum(['createdAt', 'updatedAt', 'appliedAt', 'company']).default('createdAt'),
-  sortOrder: z.enum(['asc', 'desc']).default('desc'),
-  page: z.coerce.number().int().positive().default(1),
-  pageSize: z.coerce.number().int().positive().max(100).default(20),
+  status: z.enum(applicationStatus.enumValues).optional().openapi({ example: 'applied' }),
+  company: z.string().min(1).optional().openapi({ example: 'Acme' }),
+  sortBy: z
+    .enum(['createdAt', 'updatedAt', 'appliedAt', 'company'])
+    .default('createdAt')
+    .openapi({ example: 'createdAt' }),
+  sortOrder: z.enum(['asc', 'desc']).default('desc').openapi({ example: 'desc' }),
+  page: z.coerce.number().int().positive().default(1).openapi({ example: 1 }),
+  pageSize: z.coerce.number().int().positive().max(100).default(20).openapi({ example: 20 }),
 });
 
 const applicationResponseSchema = z.object({
-  id: z.string(),
-  userId: z.string(),
-  company: z.string(),
-  role: z.string(),
-  status: z.enum(applicationStatus.enumValues),
-  location: z.string().nullable(),
-  jobUrl: z.string().nullable(),
-  salaryMin: z.number().nullable(),
-  salaryMax: z.number().nullable(),
-  salaryCurrency: z.string().nullable(),
-  notes: z.string().nullable(),
-  appliedAt: z.string().nullable(),
-  createdAt: z.string(),
-  updatedAt: z.string(),
+  id: z.string().openapi({ example: 'c941f7fe-d1cb-402e-9ab4-03fdb782564d' }),
+  userId: z.string().openapi({ example: 'aec331f2-0952-4248-b226-89cbf759d86e' }),
+  company: z.string().openapi({ example: 'Acme Corp' }),
+  role: z.string().openapi({ example: 'Backend Engineer' }),
+  status: z.enum(applicationStatus.enumValues).openapi({ example: 'applied' }),
+  location: z.string().nullable().openapi({ example: 'Remote' }),
+  jobUrl: z.string().nullable().openapi({ example: 'https://example.com/jobs/123' }),
+  salaryMin: z.number().nullable().openapi({ example: 90000 }),
+  salaryMax: z.number().nullable().openapi({ example: 130000 }),
+  salaryCurrency: z.string().nullable().openapi({ example: 'USD' }),
+  notes: z.string().nullable().openapi({ example: 'Referred by a friend' }),
+  appliedAt: z.string().nullable().openapi({ example: '2026-08-01T00:00:00.000Z' }),
+  createdAt: z.string().openapi({ example: '2026-08-29T08:27:25.705Z' }),
+  updatedAt: z.string().openapi({ example: '2026-08-29T08:27:25.705Z' }),
 });
 
 const listApplicationsResponseSchema = z.object({
