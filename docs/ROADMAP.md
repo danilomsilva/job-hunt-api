@@ -119,11 +119,12 @@ demonstrates.
 
 ## Phase 2 — Frontend (React + TypeScript)
 
-_Placeholder — to be detailed once Phase 1 is done._
-
-A separate repo. A React + TypeScript client that consumes this API: auth flow
-with token refresh, the applications list with filtering/sorting/pagination wired
-to the API, and create/edit/detail views for an application.
+Underway in a separate repo: [`job-hunt-ui`](https://github.com/danilomsilva/job-hunt-ui)
+(its own `docs/ROADMAP.md` has the full plan). A React + TypeScript client that
+consumes this API: auth flow with token refresh, the applications list with
+filtering/sorting/pagination wired to the API, and create/edit/detail views for
+an application. This repo's `docs/API.md` and live Swagger UI (`/ui`) stay the
+one source of truth for the contract — `job-hunt-ui` doesn't duplicate it.
 
 ---
 
