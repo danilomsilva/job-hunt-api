@@ -51,6 +51,14 @@ export function createApp(): OpenAPIHono {
     });
   });
 
+  // Lets Swagger UI show an "Authorize" button for the protected
+  // /applications routes, which declare `security: [{ Bearer: [] }]`.
+  app.openAPIRegistry.registerComponent('securitySchemes', 'Bearer', {
+    type: 'http',
+    scheme: 'bearer',
+    bearerFormat: 'JWT',
+  });
+
   app.doc('/doc', { openapi: '3.0.0', info: { title: 'job-hunt-api', version: '0.1.0' } });
   app.get('/ui', swaggerUI({ url: '/doc' }));
 

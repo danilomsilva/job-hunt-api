@@ -135,6 +135,7 @@ const listRoute = createRoute({
   method: 'get',
   path: '/',
   tags: ['Applications'],
+  security: [{ Bearer: [] }],
   request: { query: listQuerySchema },
   responses: {
     200: {
@@ -184,6 +185,7 @@ const createRouteDef = createRoute({
   method: 'post',
   path: '/',
   tags: ['Applications'],
+  security: [{ Bearer: [] }],
   request: {
     body: { content: { 'application/json': { schema: createApplicationSchema } }, required: true },
   },
@@ -211,6 +213,7 @@ const getRoute = createRoute({
   method: 'get',
   path: '/{id}',
   tags: ['Applications'],
+  security: [{ Bearer: [] }],
   request: { params: idParamSchema },
   responses: {
     200: {
@@ -234,6 +237,7 @@ const updateRoute = createRoute({
   method: 'patch',
   path: '/{id}',
   tags: ['Applications'],
+  security: [{ Bearer: [] }],
   request: {
     params: idParamSchema,
     body: { content: { 'application/json': { schema: updateApplicationSchema } }, required: true },
@@ -265,6 +269,7 @@ const deleteRoute = createRoute({
   method: 'delete',
   path: '/{id}',
   tags: ['Applications'],
+  security: [{ Bearer: [] }],
   request: { params: idParamSchema },
   responses: {
     204: { description: 'Application deleted' },
