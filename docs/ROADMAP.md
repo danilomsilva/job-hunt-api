@@ -59,7 +59,7 @@ See [`API.md`](API.md) for the domain model and endpoint contracts.
 - [x] Auth endpoints (register, login, refresh, logout)
 - [x] Applications CRUD
 - [x] Filtering, sorting, pagination
-- [ ] Integration tests
+- [x] Integration tests
 - [ ] Docker
 - [ ] Deployed to Railway / Fly.io
 

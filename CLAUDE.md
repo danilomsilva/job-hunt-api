@@ -47,6 +47,6 @@ This is a learning project — the goal is a production-quality backend built fr
 - [x] Auth endpoints (register, login, refresh, logout)
 - [x] Applications CRUD
 - [x] Filtering, sorting, pagination
-- [ ] Integration tests
+- [x] Integration tests
 - [ ] Docker
 - [ ] Deployed to Railway / Fly.io
