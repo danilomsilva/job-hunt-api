@@ -1,17 +1,17 @@
 /**
- * Applications CRUD — see docs/API.md for the contract.
+ * Applications CRUD — see docs/API.md for the contract, or /ui for interactive
+ * Swagger docs generated from these same schemas.
  *
  * Every route requires a signed-in user (requireAuth), and list/create are
  * both scoped to that user via userId from the access token.
  */
-import { Hono } from 'hono';
+import { OpenAPIHono, createRoute, z } from '@hono/zod-openapi';
 import { and, asc, count, desc, eq, ilike } from 'drizzle-orm';
-import { z } from 'zod';
 import { db } from '../db/client.js';
 import { applicationStatus, applications } from '../db/schema.js';
+import { errorResponseSchema } from '../middleware/error-handler.js';
 import { NotFoundError } from '../lib/errors.js';
 import { requireAuth } from '../middleware/auth.js';
-import { parseInput } from '../lib/validate.js';
 
 const applicationFields = z.object({
   company: z.string().min(1),
@@ -59,6 +59,44 @@ const listQuerySchema = z.object({
   pageSize: z.coerce.number().int().positive().max(100).default(20),
 });
 
+const applicationResponseSchema = z.object({
+  id: z.string(),
+  userId: z.string(),
+  company: z.string(),
+  role: z.string(),
+  status: z.enum(applicationStatus.enumValues),
+  location: z.string().nullable(),
+  jobUrl: z.string().nullable(),
+  salaryMin: z.number().nullable(),
+  salaryMax: z.number().nullable(),
+  salaryCurrency: z.string().nullable(),
+  notes: z.string().nullable(),
+  appliedAt: z.string().nullable(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+});
+
+const listApplicationsResponseSchema = z.object({
+  data: z.array(applicationResponseSchema),
+  pagination: z.object({
+    page: z.number(),
+    pageSize: z.number(),
+    total: z.number(),
+    totalPages: z.number(),
+  }),
+});
+
+// The `id` param is deliberately a plain string, not z.string().uuid() —
+// tightening it here would make zod-openapi reject a malformed id with its
+// own 400 before the handler runs. The existing, tested behavior is 404 for
+// a malformed id (same as a nonexistent one), via parseId() below.
+const idParamSchema = z.object({
+  id: z.string().openapi({
+    param: { name: 'id', in: 'path' },
+    example: '00000000-0000-0000-0000-000000000000',
+  }),
+});
+
 const sortColumns = {
   createdAt: applications.createdAt,
   updatedAt: applications.updatedAt,
@@ -89,13 +127,26 @@ async function findOwned(id: string, userId: string) {
   return row;
 }
 
-export const applicationsRoutes = new Hono();
+export const applicationsRoutes = new OpenAPIHono();
 
 applicationsRoutes.use('*', requireAuth);
 
-applicationsRoutes.get('/', async (c) => {
+const listRoute = createRoute({
+  method: 'get',
+  path: '/',
+  tags: ['Applications'],
+  request: { query: listQuerySchema },
+  responses: {
+    200: {
+      content: { 'application/json': { schema: listApplicationsResponseSchema } },
+      description: "The caller's applications, filtered/sorted/paginated",
+    },
+  },
+});
+
+applicationsRoutes.openapi(listRoute, async (c) => {
   const userId = c.get('userId');
-  const query = parseInput(listQuerySchema, c.req.query());
+  const query = c.req.valid('query');
 
   const conditions = [eq(applications.userId, userId)];
   if (query.status) conditions.push(eq(applications.status, query.status));
@@ -129,9 +180,24 @@ applicationsRoutes.get('/', async (c) => {
   });
 });
 
-applicationsRoutes.post('/', async (c) => {
+const createRouteDef = createRoute({
+  method: 'post',
+  path: '/',
+  tags: ['Applications'],
+  request: {
+    body: { content: { 'application/json': { schema: createApplicationSchema } }, required: true },
+  },
+  responses: {
+    201: {
+      content: { 'application/json': { schema: applicationResponseSchema } },
+      description: 'Application created',
+    },
+  },
+});
+
+applicationsRoutes.openapi(createRouteDef, async (c) => {
   const userId = c.get('userId');
-  const data = parseInput(createApplicationSchema, await c.req.json());
+  const data = c.req.valid('json');
 
   const [row] = await db
     .insert(applications)
@@ -141,25 +207,76 @@ applicationsRoutes.post('/', async (c) => {
   return c.json(row, 201);
 });
 
-applicationsRoutes.get('/:id', async (c) => {
-  const id = parseId(c.req.param('id'));
-  const row = await findOwned(id, c.get('userId'));
-  return c.json(row);
+const getRoute = createRoute({
+  method: 'get',
+  path: '/{id}',
+  tags: ['Applications'],
+  request: { params: idParamSchema },
+  responses: {
+    200: {
+      content: { 'application/json': { schema: applicationResponseSchema } },
+      description: 'The application',
+    },
+    404: {
+      content: { 'application/json': { schema: errorResponseSchema } },
+      description: 'Not found, or not owned by you',
+    },
+  },
 });
 
-applicationsRoutes.patch('/:id', async (c) => {
-  const id = parseId(c.req.param('id'));
+applicationsRoutes.openapi(getRoute, async (c) => {
+  const id = parseId(c.req.valid('param').id);
+  const row = await findOwned(id, c.get('userId'));
+  return c.json(row, 200);
+});
+
+const updateRoute = createRoute({
+  method: 'patch',
+  path: '/{id}',
+  tags: ['Applications'],
+  request: {
+    params: idParamSchema,
+    body: { content: { 'application/json': { schema: updateApplicationSchema } }, required: true },
+  },
+  responses: {
+    200: {
+      content: { 'application/json': { schema: applicationResponseSchema } },
+      description: 'Application updated',
+    },
+    404: {
+      content: { 'application/json': { schema: errorResponseSchema } },
+      description: 'Not found, or not owned by you',
+    },
+  },
+});
+
+applicationsRoutes.openapi(updateRoute, async (c) => {
+  const id = parseId(c.req.valid('param').id);
   const userId = c.get('userId');
   await findOwned(id, userId);
 
-  const data = parseInput(updateApplicationSchema, await c.req.json());
+  const data = c.req.valid('json');
   const [row] = await db.update(applications).set(data).where(eq(applications.id, id)).returning();
 
-  return c.json(row);
+  return c.json(row, 200);
 });
 
-applicationsRoutes.delete('/:id', async (c) => {
-  const id = parseId(c.req.param('id'));
+const deleteRoute = createRoute({
+  method: 'delete',
+  path: '/{id}',
+  tags: ['Applications'],
+  request: { params: idParamSchema },
+  responses: {
+    204: { description: 'Application deleted' },
+    404: {
+      content: { 'application/json': { schema: errorResponseSchema } },
+      description: 'Not found, or not owned by you',
+    },
+  },
+});
+
+applicationsRoutes.openapi(deleteRoute, async (c) => {
+  const id = parseId(c.req.valid('param').id);
   const userId = c.get('userId');
   await findOwned(id, userId);
 
