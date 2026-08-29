@@ -6,6 +6,7 @@
  */
 import { OpenAPIHono } from '@hono/zod-openapi';
 import { swaggerUI } from '@hono/swagger-ui';
+import { cors } from 'hono/cors';
 import { logger } from 'hono/logger';
 import { requestId } from 'hono/request-id';
 import { treeifyError } from 'zod';
@@ -34,6 +35,16 @@ export function createApp(): OpenAPIHono {
 
   app.use('*', requestId());
   app.use('*', logger());
+
+  // job-hunt-ui's Vite dev server — a different origin, so the browser (not
+  // curl, not Swagger's server-side fetch) enforces CORS on every request.
+  app.use(
+    '*',
+    cors({
+      origin: 'http://localhost:5173',
+      allowHeaders: ['Content-Type', 'Authorization'],
+    }),
+  );
 
   // Skipped in tests: the default keyGenerator reads a real Node socket via
   // getConnInfo, which doesn't exist under app.request()'s test dispatch —
