@@ -17,7 +17,7 @@ This is a learning project — the goal is a production-quality backend built fr
 - **Validation:** Zod on every endpoint
 - **Testing:** Vitest + supertest
 - **Linting:** ESLint + Prettier
-- **Deployment:** Docker + Railway or Fly.io
+- **Deployment:** none — decided to keep this running locally only (see `docs/ROADMAP.md`)
 
 ## Code standards
 
@@ -48,5 +48,5 @@ This is a learning project — the goal is a production-quality backend built fr
 - [x] Applications CRUD
 - [x] Filtering, sorting, pagination
 - [x] Integration tests
-- [ ] Docker
-- [ ] Deployed to Railway / Fly.io
+- [ ] Docker — **skipped by decision**, staying local only (see `docs/ROADMAP.md`)
+- [ ] Deployed to Railway / Fly.io — **skipped by decision**, staying local only (see `docs/ROADMAP.md`)
