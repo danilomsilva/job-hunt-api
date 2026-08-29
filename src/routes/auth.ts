@@ -17,7 +17,7 @@ import {
   refreshTokenExpiresAt,
   signAccessToken,
 } from '../lib/tokens.js';
-import { parseBody } from '../lib/validate.js';
+import { parseInput } from '../lib/validate.js';
 
 const credentialsSchema = z.object({
   email: z.email(),
@@ -58,7 +58,7 @@ async function issueTokenPair(userId: string) {
 export const authRoutes = new Hono();
 
 authRoutes.post('/register', async (c) => {
-  const { email, password } = parseBody(credentialsSchema, await c.req.json());
+  const { email, password } = parseInput(credentialsSchema, await c.req.json());
   const passwordHash = await hashPassword(password);
 
   try {
@@ -77,7 +77,7 @@ authRoutes.post('/register', async (c) => {
 });
 
 authRoutes.post('/login', async (c) => {
-  const { email, password } = parseBody(credentialsSchema, await c.req.json());
+  const { email, password } = parseInput(credentialsSchema, await c.req.json());
 
   const [user] = await db.select().from(users).where(eq(users.email, email)).limit(1);
 
@@ -92,7 +92,7 @@ authRoutes.post('/login', async (c) => {
 });
 
 authRoutes.post('/refresh', async (c) => {
-  const { refreshToken } = parseBody(refreshSchema, await c.req.json());
+  const { refreshToken } = parseInput(refreshSchema, await c.req.json());
   const tokenHash = hashRefreshToken(refreshToken);
 
   const [existing] = await db
@@ -111,7 +111,7 @@ authRoutes.post('/refresh', async (c) => {
 });
 
 authRoutes.post('/logout', async (c) => {
-  const { refreshToken } = parseBody(refreshSchema, await c.req.json());
+  const { refreshToken } = parseInput(refreshSchema, await c.req.json());
   const tokenHash = hashRefreshToken(refreshToken);
 
   // Delete if present; don't reveal whether the token existed either way.

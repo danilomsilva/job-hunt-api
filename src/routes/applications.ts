@@ -11,7 +11,7 @@ import { db } from '../db/client.js';
 import { applicationStatus, applications } from '../db/schema.js';
 import { NotFoundError } from '../lib/errors.js';
 import { requireAuth } from '../middleware/auth.js';
-import { parseBody } from '../lib/validate.js';
+import { parseInput } from '../lib/validate.js';
 
 const applicationFields = z.object({
   company: z.string().min(1),
@@ -90,7 +90,7 @@ applicationsRoutes.get('/', async (c) => {
 
 applicationsRoutes.post('/', async (c) => {
   const userId = c.get('userId');
-  const data = parseBody(createApplicationSchema, await c.req.json());
+  const data = parseInput(createApplicationSchema, await c.req.json());
 
   const [row] = await db
     .insert(applications)
@@ -111,7 +111,7 @@ applicationsRoutes.patch('/:id', async (c) => {
   const userId = c.get('userId');
   await findOwned(id, userId);
 
-  const data = parseBody(updateApplicationSchema, await c.req.json());
+  const data = parseInput(updateApplicationSchema, await c.req.json());
   const [row] = await db.update(applications).set(data).where(eq(applications.id, id)).returning();
 
   return c.json(row);
