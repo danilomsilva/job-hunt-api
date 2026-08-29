@@ -13,8 +13,8 @@ properly, not to ship fast with shortcuts.
 2. REST API design: resource naming, status codes, error shapes, pagination
 3. PostgreSQL: schema design, migrations, relational data
 4. Auth: JWT (access + refresh tokens), bcrypt, middleware guards
-5. Testing: integration tests with Vitest + supertest
-6. ~~Deployment: Docker + Railway or Fly.io~~ — decided against; see "Deployment decision" below
+5. Testing: integration tests with Vitest (Hono's built-in `app.request()`, no supertest needed)
+6. Deployment: Docker (done, local-only) + ~~Railway or Fly.io~~ (decided against; see "Deployment decision" below)
 
 ## Tech stack decisions
 
@@ -26,9 +26,9 @@ that stay close to the underlying concepts.
 - **Database:** PostgreSQL
 - **ORM:** Drizzle ORM — TypeScript-native, close to raw SQL, great for learning
 - **Auth:** JWT (access token + refresh token pattern) + bcrypt
-- **Testing:** Vitest + supertest
+- **Testing:** Vitest, using Hono's built-in `app.request()` for integration tests
 - **Linting:** ESLint + Prettier
-- **Deployment:** none — decided to stay local; see "Deployment decision" below
+- **Deployment:** Docker image for the app, local only — no hosting; see "Deployment decision" below
 
 ---
 
@@ -44,7 +44,7 @@ Build this API: a production-quality job application tracker, running locally.
 | 4. Applications CRUD | 4–5   | All five endpoints, Zod validation on every body, ownership checks, tests         |
 | 5. List refinements  | 6     | Filtering, sorting, pagination on `GET /applications`, tests                      |
 | 6. Hardening         | 7     | Unified error response shape, request logging, rate limiting, full test pass, CI  |
-| ~~7. Deploy~~        | —     | **Skipped by decision** — see "Deployment decision" below                         |
+| 7. Deploy            | —     | Docker image: done, local-only. Hosting it: **skipped by decision**, see below    |
 
 See [`API.md`](API.md) for the domain model and endpoint contracts.
 
@@ -59,7 +59,7 @@ See [`API.md`](API.md) for the domain model and endpoint contracts.
 - [x] Applications CRUD
 - [x] Filtering, sorting, pagination
 - [x] Integration tests
-- [ ] Docker — **skipped by decision**, staying local only
+- [x] Docker — app + Postgres both containerized locally (see "Deployment decision" below)
 - [ ] Deployed to Railway / Fly.io — **skipped by decision**, staying local only
 
 ### Deployment decision
@@ -80,6 +80,13 @@ goal is the backend fundamentals, not ops upkeep.
 Everything in `docs/API.md` and this roadmap otherwise describes the app as
 it runs locally via `docker compose up -d` + `npm run dev`. Phase 2 (the
 frontend) will point at `localhost`, not a deployed URL.
+
+**Update:** the app itself was containerized afterward anyway (a multi-stage
+`Dockerfile`, opt-in via `docker compose --profile app up`) — as a local-only
+exercise in the mechanics (container-to-container networking, image size,
+build caching), independent of this decision. What's declined here is
+specifically _hosting it somewhere_, not building it as a deployable image.
+See the README's [Docker section](../README.md#docker) for how to run it.
 
 ---
 

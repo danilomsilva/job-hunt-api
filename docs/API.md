@@ -60,6 +60,14 @@ Response shape: `{ data: Application[], pagination: { page, pageSize, total, tot
 
 - Resource naming: plural nouns, no verbs in paths
 - Status codes: `201` on create, `204` on delete, `400` for validation errors,
-  `401`/`403` for auth, `404` for missing resources
+  `401` for auth, `404` for missing (or not-owned) resources, `409` for
+  conflicts, `429` for rate limiting
 - Consistent error response shape across every endpoint
 - Pagination on all list endpoints
+
+## Rate limiting
+
+Fixed-window, per client IP: 20 requests / 15 min on `/auth/*`, 300 requests /
+15 min across the whole API (auth requests count against both). A request
+over the limit gets `429` with a `Retry-After` header (seconds until the
+window resets), in the same error shape as every other failure.

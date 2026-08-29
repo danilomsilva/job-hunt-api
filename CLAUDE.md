@@ -15,7 +15,7 @@ This is a learning project — the goal is a production-quality backend built fr
 - **ORM:** Drizzle ORM — TypeScript-native, close to raw SQL, great for learning
 - **Auth:** JWT (access token + refresh token pattern) + bcrypt
 - **Validation:** Zod on every endpoint
-- **Testing:** Vitest + supertest
+- **Testing:** Vitest, using Hono's built-in `app.request()` for integration tests (no supertest needed)
 - **Linting:** ESLint + Prettier
 - **Deployment:** none — decided to keep this running locally only (see `docs/ROADMAP.md`)
 
@@ -48,5 +48,5 @@ This is a learning project — the goal is a production-quality backend built fr
 - [x] Applications CRUD
 - [x] Filtering, sorting, pagination
 - [x] Integration tests
-- [ ] Docker — **skipped by decision**, staying local only (see `docs/ROADMAP.md`)
+- [x] Docker — app + Postgres both containerized locally (`docker-compose.yml`); see README's Docker section
 - [ ] Deployed to Railway / Fly.io — **skipped by decision**, staying local only (see `docs/ROADMAP.md`)
