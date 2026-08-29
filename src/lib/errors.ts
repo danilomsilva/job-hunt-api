@@ -62,3 +62,10 @@ export class ValidationError extends AppError {
     super(400, 'VALIDATION_ERROR', message, details);
   }
 }
+
+/** 429 — too many requests in a given window. */
+export class TooManyRequestsError extends AppError {
+  constructor(message = 'Too many requests, please try again later', details?: unknown) {
+    super(429, 'TOO_MANY_REQUESTS', message, details);
+  }
+}
