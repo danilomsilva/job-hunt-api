@@ -88,6 +88,33 @@ build caching), independent of this decision. What's declined here is
 specifically _hosting it somewhere_, not building it as a deployable image.
 See the README's [Docker section](../README.md#docker) for how to run it.
 
+**Revisited (2026-08-29), decision unchanged.** Now that the project is
+genuinely portfolio-ready (tests, CI, Swagger docs, a written-up README),
+re-checked whether a live demo link was worth it:
+
+- **Render + Neon** actually fixes the original blocker — Neon's free
+  Postgres has no card requirement and, unlike Render's own free Postgres,
+  no auto-deletion; only its compute scales to zero after inactivity, data
+  persists indefinitely. Render's web service would still cold-start after
+  15 min idle, but that's a minor demo-link inconvenience, not a
+  dealbreaker.
+- **Vercel was also considered** (host everything in one place) and ruled
+  out for a concrete technical reason, not convenience: Vercel runs
+  serverless functions (5 min max duration, no guaranteed persistent
+  process between invocations), which breaks two things this app actually
+  relies on — the in-memory rate limiter (`src/middleware/rate-limit.ts`)
+  assumes state survives between requests, and the single long-lived
+  `pg.Pool` in `src/db/client.ts` assumes one persistent process. Both are
+  correct for a long-running server (which is what `npm start` already is,
+  and what Render runs unmodified) and both would need real rework to run
+  correctly on Vercel.
+
+Even with a technically-viable free path now available, the call is still
+to stay local — the project's value was always the backend engineering
+itself, not a live URL, and Render+Neon would be net-new accounts and
+moving parts to maintain for a benefit that doesn't change what the project
+demonstrates.
+
 ---
 
 ## Phase 2 — Frontend (React + TypeScript)
