@@ -58,7 +58,7 @@ See [`API.md`](API.md) for the domain model and endpoint contracts.
 - [x] Drizzle ORM set up with first migration
 - [x] Auth endpoints (register, login, refresh, logout)
 - [x] Applications CRUD
-- [ ] Filtering, sorting, pagination
+- [x] Filtering, sorting, pagination
 - [ ] Integration tests
 - [ ] Docker
 - [ ] Deployed to Railway / Fly.io

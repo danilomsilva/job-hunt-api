@@ -37,6 +37,19 @@ and follow RESTful status-code conventions.
 | `PATCH /applications/:id`  | Update (status, notes, etc.)             |
 | `DELETE /applications/:id` | Delete                                   |
 
+`GET /applications` query params (all optional):
+
+| Param       | Values                                           | Default     |
+| ----------- | ------------------------------------------------ | ----------- |
+| `status`    | one of the status flow values above              | (none)      |
+| `company`   | case-insensitive partial match                   | (none)      |
+| `sortBy`    | `createdAt`, `updatedAt`, `appliedAt`, `company` | `createdAt` |
+| `sortOrder` | `asc`, `desc`                                    | `desc`      |
+| `page`      | positive integer                                 | `1`         |
+| `pageSize`  | positive integer, max `100`                      | `20`        |
+
+Response shape: `{ data: Application[], pagination: { page, pageSize, total, totalPages } }`.
+
 ## Conventions to enforce
 
 - Resource naming: plural nouns, no verbs in paths

@@ -46,7 +46,7 @@ This is a learning project — the goal is a production-quality backend built fr
 - [x] Drizzle ORM set up with first migration
 - [x] Auth endpoints (register, login, refresh, logout)
 - [x] Applications CRUD
-- [ ] Filtering, sorting, pagination
+- [x] Filtering, sorting, pagination
 - [ ] Integration tests
 - [ ] Docker
 - [ ] Deployed to Railway / Fly.io
