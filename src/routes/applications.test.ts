@@ -75,6 +75,11 @@ describe('POST /applications', () => {
   });
 });
 
+interface ListResponse {
+  data: { company: string; status: string }[];
+  pagination: { page: number; pageSize: number; total: number; totalPages: number };
+}
+
 describe('GET /applications', () => {
   it("only returns the caller's own applications", async () => {
     const tokenA = await createUser();
@@ -83,9 +88,61 @@ describe('GET /applications', () => {
     await request('POST', '/applications', tokenB, { company: 'Other Co', role: 'Designer' });
 
     const res = await request('GET', '/applications', tokenA);
-    const body = (await res.json()) as { company: string }[];
-    expect(body).toHaveLength(1);
-    expect(body[0]?.company).toBe('Acme');
+    const body = (await res.json()) as ListResponse;
+    expect(body.data).toHaveLength(1);
+    expect(body.data[0]?.company).toBe('Acme');
+  });
+
+  it('filters by status', async () => {
+    const token = await createUser();
+    await request('POST', '/applications', token, validApplication);
+    const applied = (await (
+      await request('POST', '/applications', token, { company: 'Beta', role: 'SRE' })
+    ).json()) as { id: string };
+    await request('PATCH', `/applications/${applied.id}`, token, { status: 'applied' });
+
+    const res = await request('GET', '/applications?status=applied', token);
+    const body = (await res.json()) as ListResponse;
+    expect(body.data).toHaveLength(1);
+    expect(body.data[0]?.company).toBe('Beta');
+  });
+
+  it('filters by company, case-insensitively and partially', async () => {
+    const token = await createUser();
+    await request('POST', '/applications', token, { company: 'Acme Corp', role: 'Engineer' });
+    await request('POST', '/applications', token, { company: 'Other Co', role: 'Designer' });
+
+    const res = await request('GET', '/applications?company=acme', token);
+    const body = (await res.json()) as ListResponse;
+    expect(body.data).toHaveLength(1);
+    expect(body.data[0]?.company).toBe('Acme Corp');
+  });
+
+  it('sorts by the requested column and direction', async () => {
+    const token = await createUser();
+    await request('POST', '/applications', token, { company: 'Zeta', role: 'Engineer' });
+    await request('POST', '/applications', token, { company: 'Alpha', role: 'Engineer' });
+
+    const res = await request('GET', '/applications?sortBy=company&sortOrder=asc', token);
+    const body = (await res.json()) as ListResponse;
+    expect(body.data.map((a) => a.company)).toEqual(['Alpha', 'Zeta']);
+  });
+
+  it('paginates and reports accurate totals', async () => {
+    const token = await createUser();
+    await request('POST', '/applications', token, { company: 'One', role: 'Engineer' });
+    await request('POST', '/applications', token, { company: 'Two', role: 'Engineer' });
+
+    const res = await request('GET', '/applications?pageSize=1&page=2', token);
+    const body = (await res.json()) as ListResponse;
+    expect(body.data).toHaveLength(1);
+    expect(body.pagination).toEqual({ page: 2, pageSize: 1, total: 2, totalPages: 2 });
+  });
+
+  it('rejects an invalid query value with 400', async () => {
+    const token = await createUser();
+    expect((await request('GET', '/applications?status=bogus', token)).status).toBe(400);
+    expect((await request('GET', '/applications?pageSize=101', token)).status).toBe(400);
   });
 });
 
