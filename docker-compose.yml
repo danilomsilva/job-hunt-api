@@ -3,6 +3,16 @@
 #   docker compose up -d       start Postgres in the background
 #   docker compose down        stop it, keep the data
 #   docker compose down -v     stop it and wipe the data volume
+#
+# The `app` service below is opt-in (profiles: [app]) — a plain `up -d`
+# never starts it. It's a local-only exercise in running the app itself as
+# a container, not the normal dev workflow (keep using `npm run dev` for
+# that — it hot-reloads, this doesn't). To try it:
+#
+#   npm run db:migrate                    apply migrations first (as usual)
+#   docker compose --profile app up --build
+#   curl http://localhost:3001/health     it's on 3001, not 3000, so it
+#                                          never conflicts with `npm run dev`
 
 services:
   postgres:
@@ -24,6 +34,26 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+
+  app:
+    build: .
+    container_name: job-hunt-app
+    profiles: ['app']
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      # Containers reach each other by service name, not localhost — this
+      # is the same "postgres" name as the service above, not a hostname
+      # that exists outside this compose network.
+      DATABASE_URL: postgres://postgres:postgres@postgres:5432/job_hunt
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_ACCESS_TTL: ${JWT_ACCESS_TTL:-15m}
+      JWT_REFRESH_TTL_DAYS: ${JWT_REFRESH_TTL_DAYS:-30}
+    ports:
+      - '3001:3000'
 
 volumes:
   job-hunt-pgdata:
