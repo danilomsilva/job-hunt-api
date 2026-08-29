@@ -4,17 +4,33 @@
  * `createApp()` returns a fresh instance so tests can run in isolation.
  * `app` is the singleton used by the server entry point.
  */
-import { Hono } from 'hono';
+import { OpenAPIHono } from '@hono/zod-openapi';
+import { swaggerUI } from '@hono/swagger-ui';
 import { logger } from 'hono/logger';
 import { requestId } from 'hono/request-id';
+import { treeifyError } from 'zod';
 import { errorHandler, notFoundHandler } from './middleware/error-handler.js';
 import { rateLimit } from './middleware/rate-limit.js';
 import { authRoutes } from './routes/auth.js';
 import { applicationsRoutes } from './routes/applications.js';
+import { ValidationError } from './lib/errors.js';
 import { env } from './env.js';
 
-export function createApp(): Hono {
-  const app = new Hono();
+export function createApp(): OpenAPIHono {
+  const app = new OpenAPIHono({
+    // Without this, a createRoute schema failure returns zod-openapi's own
+    // response shape instead of this API's consistent { error, requestId }
+    // one. Throwing here routes it through the same errorHandler as every
+    // other error in the app.
+    defaultHook: (result) => {
+      if (!result.success) {
+        throw new ValidationError(
+          'The request payload failed validation',
+          treeifyError(result.error),
+        );
+      }
+    },
+  });
 
   app.use('*', requestId());
   app.use('*', logger());
@@ -34,6 +50,9 @@ export function createApp(): Hono {
       timestamp: new Date().toISOString(),
     });
   });
+
+  app.doc('/doc', { openapi: '3.0.0', info: { title: 'job-hunt-api', version: '0.1.0' } });
+  app.get('/ui', swaggerUI({ url: '/doc' }));
 
   app.route('/auth', authRoutes);
   app.route('/applications', applicationsRoutes);

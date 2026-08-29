@@ -1,14 +1,15 @@
 /**
- * Auth endpoints — see docs/API.md for the contract.
+ * Auth endpoints — see docs/API.md for the contract, or /ui for interactive
+ * Swagger docs generated from these same schemas.
  *
  * Refresh tokens are DB-backed (see db/schema.ts's `refreshTokens`) rather than a
  * second JWT, specifically so `logout` can revoke one before it expires.
  */
-import { Hono } from 'hono';
+import { OpenAPIHono, createRoute, z } from '@hono/zod-openapi';
 import { eq } from 'drizzle-orm';
-import { z } from 'zod';
 import { db } from '../db/client.js';
 import { users, refreshTokens } from '../db/schema.js';
+import { errorResponseSchema } from '../middleware/error-handler.js';
 import { ConflictError, UnauthorizedError } from '../lib/errors.js';
 import { hashPassword, verifyPassword } from '../lib/password.js';
 import {
@@ -17,7 +18,6 @@ import {
   refreshTokenExpiresAt,
   signAccessToken,
 } from '../lib/tokens.js';
-import { parseInput } from '../lib/validate.js';
 
 const credentialsSchema = z.object({
   email: z.email(),
@@ -27,6 +27,17 @@ const credentialsSchema = z.object({
 
 const refreshSchema = z.object({
   refreshToken: z.string().min(1),
+});
+
+const userResponseSchema = z.object({
+  id: z.string(),
+  email: z.string(),
+  createdAt: z.string(),
+});
+
+const tokenPairSchema = z.object({
+  accessToken: z.string(),
+  refreshToken: z.string(),
 });
 
 function pgErrorCode(err: unknown): string | undefined {
@@ -55,10 +66,29 @@ async function issueTokenPair(userId: string) {
   return { accessToken, refreshToken };
 }
 
-export const authRoutes = new Hono();
+export const authRoutes = new OpenAPIHono();
 
-authRoutes.post('/register', async (c) => {
-  const { email, password } = parseInput(credentialsSchema, await c.req.json());
+const registerRoute = createRoute({
+  method: 'post',
+  path: '/register',
+  tags: ['Auth'],
+  request: {
+    body: { content: { 'application/json': { schema: credentialsSchema } }, required: true },
+  },
+  responses: {
+    201: {
+      content: { 'application/json': { schema: userResponseSchema } },
+      description: 'Account created',
+    },
+    409: {
+      content: { 'application/json': { schema: errorResponseSchema } },
+      description: 'An account with this email already exists',
+    },
+  },
+});
+
+authRoutes.openapi(registerRoute, async (c) => {
+  const { email, password } = c.req.valid('json');
   const passwordHash = await hashPassword(password);
 
   try {
@@ -76,8 +106,27 @@ authRoutes.post('/register', async (c) => {
   }
 });
 
-authRoutes.post('/login', async (c) => {
-  const { email, password } = parseInput(credentialsSchema, await c.req.json());
+const loginRoute = createRoute({
+  method: 'post',
+  path: '/login',
+  tags: ['Auth'],
+  request: {
+    body: { content: { 'application/json': { schema: credentialsSchema } }, required: true },
+  },
+  responses: {
+    200: {
+      content: { 'application/json': { schema: tokenPairSchema } },
+      description: 'Access and refresh token pair',
+    },
+    401: {
+      content: { 'application/json': { schema: errorResponseSchema } },
+      description: 'Invalid email or password',
+    },
+  },
+});
+
+authRoutes.openapi(loginRoute, async (c) => {
+  const { email, password } = c.req.valid('json');
 
   const [user] = await db.select().from(users).where(eq(users.email, email)).limit(1);
 
@@ -91,8 +140,27 @@ authRoutes.post('/login', async (c) => {
   return c.json(tokens, 200);
 });
 
-authRoutes.post('/refresh', async (c) => {
-  const { refreshToken } = parseInput(refreshSchema, await c.req.json());
+const refreshRoute = createRoute({
+  method: 'post',
+  path: '/refresh',
+  tags: ['Auth'],
+  request: {
+    body: { content: { 'application/json': { schema: refreshSchema } }, required: true },
+  },
+  responses: {
+    200: {
+      content: { 'application/json': { schema: tokenPairSchema } },
+      description: 'A newly rotated access and refresh token pair',
+    },
+    401: {
+      content: { 'application/json': { schema: errorResponseSchema } },
+      description: 'Invalid or expired refresh token',
+    },
+  },
+});
+
+authRoutes.openapi(refreshRoute, async (c) => {
+  const { refreshToken } = c.req.valid('json');
   const tokenHash = hashRefreshToken(refreshToken);
 
   const [existing] = await db
@@ -110,8 +178,20 @@ authRoutes.post('/refresh', async (c) => {
   return c.json(tokens, 200);
 });
 
-authRoutes.post('/logout', async (c) => {
-  const { refreshToken } = parseInput(refreshSchema, await c.req.json());
+const logoutRoute = createRoute({
+  method: 'post',
+  path: '/logout',
+  tags: ['Auth'],
+  request: {
+    body: { content: { 'application/json': { schema: refreshSchema } }, required: true },
+  },
+  responses: {
+    204: { description: 'Refresh token invalidated, or already gone' },
+  },
+});
+
+authRoutes.openapi(logoutRoute, async (c) => {
+  const { refreshToken } = c.req.valid('json');
   const tokenHash = hashRefreshToken(refreshToken);
 
   // Delete if present; don't reveal whether the token existed either way.
