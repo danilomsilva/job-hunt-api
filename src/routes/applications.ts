@@ -5,10 +5,11 @@
  * both scoped to that user via userId from the access token.
  */
 import { Hono } from 'hono';
-import { desc, eq } from 'drizzle-orm';
+import { and, desc, eq } from 'drizzle-orm';
 import { z } from 'zod';
 import { db } from '../db/client.js';
 import { applicationStatus, applications } from '../db/schema.js';
+import { NotFoundError } from '../lib/errors.js';
 import { requireAuth } from '../middleware/auth.js';
 import { parseBody } from '../lib/validate.js';
 
@@ -39,6 +40,34 @@ const salaryRangeIssue = {
 
 const createApplicationSchema = applicationFields.refine(salaryRangeValid, salaryRangeIssue);
 
+const updateApplicationSchema = applicationFields
+  .partial()
+  .refine((v) => Object.keys(v).length > 0, { message: 'At least one field must be provided' })
+  .refine(salaryRangeValid, salaryRangeIssue);
+
+function parseId(id: string): string {
+  if (!z.uuid().safeParse(id).success) {
+    throw new NotFoundError('Application not found');
+  }
+  return id;
+}
+
+/**
+ * A nonexistent id and another user's application both return 404 — cross-
+ * user access shouldn't be distinguishable from "doesn't exist", the same way
+ * login's 401 doesn't distinguish a bad email from a bad password.
+ */
+async function findOwned(id: string, userId: string) {
+  const [row] = await db
+    .select()
+    .from(applications)
+    .where(and(eq(applications.id, id), eq(applications.userId, userId)))
+    .limit(1);
+
+  if (!row) throw new NotFoundError('Application not found');
+  return row;
+}
+
 export const applicationsRoutes = new Hono();
 
 applicationsRoutes.use('*', requireAuth);
@@ -64,4 +93,30 @@ applicationsRoutes.post('/', async (c) => {
     .returning();
 
   return c.json(row, 201);
+});
+
+applicationsRoutes.get('/:id', async (c) => {
+  const id = parseId(c.req.param('id'));
+  const row = await findOwned(id, c.get('userId'));
+  return c.json(row);
+});
+
+applicationsRoutes.patch('/:id', async (c) => {
+  const id = parseId(c.req.param('id'));
+  const userId = c.get('userId');
+  await findOwned(id, userId);
+
+  const data = parseBody(updateApplicationSchema, await c.req.json());
+  const [row] = await db.update(applications).set(data).where(eq(applications.id, id)).returning();
+
+  return c.json(row);
+});
+
+applicationsRoutes.delete('/:id', async (c) => {
+  const id = parseId(c.req.param('id'));
+  const userId = c.get('userId');
+  await findOwned(id, userId);
+
+  await db.delete(applications).where(eq(applications.id, id));
+  return c.body(null, 204);
 });
