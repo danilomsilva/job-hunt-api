@@ -14,17 +14,20 @@
  */
 import type { ErrorHandler, NotFoundHandler } from 'hono';
 import { HTTPException } from 'hono/http-exception';
+import { z } from '@hono/zod-openapi';
 import { env } from '../env.js';
 import { AppError } from '../lib/errors.js';
 
-interface ErrorResponse {
-  error: {
-    code: string;
-    message: string;
-    details?: unknown;
-  };
-  requestId: string;
-}
+export const errorResponseSchema = z.object({
+  error: z.object({
+    code: z.string(),
+    message: z.string(),
+    details: z.unknown().optional(),
+  }),
+  requestId: z.string(),
+});
+
+type ErrorResponse = z.infer<typeof errorResponseSchema>;
 
 function buildBody(
   c: Parameters<ErrorHandler>[1],
