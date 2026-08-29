@@ -57,7 +57,7 @@ See [`API.md`](API.md) for the domain model and endpoint contracts.
 - [x] PostgreSQL connected
 - [x] Drizzle ORM set up with first migration
 - [x] Auth endpoints (register, login, refresh, logout)
-- [ ] Applications CRUD
+- [x] Applications CRUD
 - [ ] Filtering, sorting, pagination
 - [ ] Integration tests
 - [ ] Docker
