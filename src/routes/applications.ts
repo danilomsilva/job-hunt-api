@@ -5,7 +5,7 @@
  * both scoped to that user via userId from the access token.
  */
 import { Hono } from 'hono';
-import { and, desc, eq } from 'drizzle-orm';
+import { and, asc, count, desc, eq, ilike } from 'drizzle-orm';
 import { z } from 'zod';
 import { db } from '../db/client.js';
 import { applicationStatus, applications } from '../db/schema.js';
@@ -50,6 +50,22 @@ const updateApplicationSchema = applicationFields
   .refine((v) => Object.keys(v).length > 0, { message: 'At least one field must be provided' })
   .refine(salaryRangeValid, salaryRangeIssue);
 
+const listQuerySchema = z.object({
+  status: z.enum(applicationStatus.enumValues).optional(),
+  company: z.string().min(1).optional(),
+  sortBy: z.enum(['createdAt', 'updatedAt', 'appliedAt', 'company']).default('createdAt'),
+  sortOrder: z.enum(['asc', 'desc']).default('desc'),
+  page: z.coerce.number().int().positive().default(1),
+  pageSize: z.coerce.number().int().positive().max(100).default(20),
+});
+
+const sortColumns = {
+  createdAt: applications.createdAt,
+  updatedAt: applications.updatedAt,
+  appliedAt: applications.appliedAt,
+  company: applications.company,
+};
+
 function parseId(id: string): string {
   if (!z.uuid().safeParse(id).success) {
     throw new NotFoundError('Application not found');
@@ -79,13 +95,38 @@ applicationsRoutes.use('*', requireAuth);
 
 applicationsRoutes.get('/', async (c) => {
   const userId = c.get('userId');
-  const rows = await db
-    .select()
-    .from(applications)
-    .where(eq(applications.userId, userId))
-    .orderBy(desc(applications.createdAt));
+  const query = parseInput(listQuerySchema, c.req.query());
 
-  return c.json(rows);
+  const conditions = [eq(applications.userId, userId)];
+  if (query.status) conditions.push(eq(applications.status, query.status));
+  if (query.company) conditions.push(ilike(applications.company, `%${query.company}%`));
+  const where = and(...conditions);
+
+  const column = sortColumns[query.sortBy];
+  const orderBy = query.sortOrder === 'asc' ? asc(column) : desc(column);
+
+  const [rows, [totalRow]] = await Promise.all([
+    db
+      .select()
+      .from(applications)
+      .where(where)
+      .orderBy(orderBy)
+      .limit(query.pageSize)
+      .offset((query.page - 1) * query.pageSize),
+    db.select({ total: count() }).from(applications).where(where),
+  ]);
+
+  const total = totalRow?.total ?? 0;
+
+  return c.json({
+    data: rows,
+    pagination: {
+      page: query.page,
+      pageSize: query.pageSize,
+      total,
+      totalPages: Math.ceil(total / query.pageSize),
+    },
+  });
 });
 
 applicationsRoutes.post('/', async (c) => {
