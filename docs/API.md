@@ -18,6 +18,12 @@ Wishlist → Applied → Phone Screen → Interview → Offer → Rejected / Acc
 All request bodies are validated with Zod. Responses use a consistent error shape
 and follow RESTful status-code conventions.
 
+> Interactive docs, generated from these same Zod schemas, are served at
+> `/ui` (Swagger UI) whenever the app is running — `/doc` has the raw
+> OpenAPI JSON. Since they're generated from the schemas that actually
+> validate every request, they can't drift out of sync with reality the way
+> this file can.
+
 ### Auth
 
 | Method & path         | Description                     |
