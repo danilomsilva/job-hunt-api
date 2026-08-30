@@ -13,6 +13,9 @@ A user can track their job applications through the hiring process.
 Wishlist → Applied → Phone Screen → Interview → Offer → Rejected / Accepted
 ```
 
+Stored and queried as lowercase, underscore-separated values: `wishlist`,
+`applied`, `phone_screen`, `interview`, `offer`, `rejected`, `accepted`.
+
 ## API resources
 
 All request bodies are validated with Zod. Responses use a consistent error shape
@@ -47,7 +50,7 @@ and follow RESTful status-code conventions.
 
 | Param       | Values                                           | Default     |
 | ----------- | ------------------------------------------------ | ----------- |
-| `status`    | one of the status flow values above              | (none)      |
+| `status`    | one of the status values above                   | (none)      |
 | `company`   | case-insensitive partial match                   | (none)      |
 | `sortBy`    | `createdAt`, `updatedAt`, `appliedAt`, `company` | `createdAt` |
 | `sortOrder` | `asc`, `desc`                                    | `desc`      |
