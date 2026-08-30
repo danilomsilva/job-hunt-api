@@ -132,5 +132,11 @@ one source of truth for the contract — `job-hunt-ui` doesn't duplicate it.
 
 _Placeholder — to be detailed later._
 
-Candidate areas: end-to-end deployment of both halves, caching, background jobs,
-observability (structured logs, metrics, tracing), and CI/CD hardening.
+The strategy for taking both halves live on a single VPS — topology, CI/CD,
+registry, reverse proxy, environments, migrations, secrets, DNS, host
+hardening, and a minimal observability setup — is written up in
+[`DEPLOYMENT.md`](DEPLOYMENT.md). Planned and reasoned through, not executed:
+the apps still run locally only.
+
+Other candidate areas: caching, background jobs, deeper observability
+(structured logs, metrics, tracing), and CI/CD hardening.

@@ -211,7 +211,9 @@ Judgment calls made along the way, and why:
 - **Not deployed** — checked Railway, Fly.io, and Render's actual current free-tier
   terms before deciding; full reasoning in [`docs/ROADMAP.md`](docs/ROADMAP.md#deployment-decision).
   The app itself is fully containerized (see [Docker](#docker)) — what was declined is
-  hosting it somewhere, not building it as a deployable artifact.
+  hosting it somewhere, not building it as a deployable artifact. The strategy that
+  _would_ be followed if it were ever hosted is written up in
+  [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md).
 
 ## Scripts
 
@@ -245,4 +247,5 @@ Judgment calls made along the way, and why:
 ---
 
 Learning project background, phased roadmap, and full domain model:
-[`docs/ROADMAP.md`](docs/ROADMAP.md) · [`docs/API.md`](docs/API.md)
+[`docs/ROADMAP.md`](docs/ROADMAP.md) · [`docs/API.md`](docs/API.md) ·
+[`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md)
