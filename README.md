@@ -62,7 +62,7 @@ requestId }`, whether the failure came from Zod, Drizzle, or application logic.
 
 ## Auth model
 
-```
+```text
 register ──▶ login ──▶ [access token, 15 min] ──▶ protected routes
                │
                └──▶ [refresh token, 30 days, hashed in DB]
@@ -172,7 +172,7 @@ Two independent, opt-in-separable services in `docker-compose.yml`:
 
 ## Project structure
 
-```
+```text
 src/
 ├── index.ts, load-env.ts, env.ts   Entry point, .env loading, Zod-validated config
 ├── app.ts                          Builds the Hono app: middleware, routes, error handling
