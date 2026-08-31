@@ -38,16 +38,16 @@ Nuremberg region — running Docker Compose, four services on a private Compose
 network. x86 rather than the cheaper CAX11 ARM shape so CI builds run on the
 default (x86) GitHub runners with no cross-compilation.
 
-| Service    | Image                          | Faces        | Role                              |
-| ---------- | ------------------------------ | ------------ | -------------------------------- |
-| `caddy`    | official `caddy`               | ports 80/443 | reverse proxy + automatic HTTPS  |
-| `web`      | built from `job-hunt-ui`       | internal     | serves the static `dist/` bundle |
-| `api`      | built from `job-hunt-api`      | internal     | Hono server (`npm start`, long-lived) |
-| `postgres` | official `postgres:16-alpine`  | internal     | volume-backed — the one stateful piece |
+| Service    | Image                         | Faces        | Role                                   |
+| ---------- | ----------------------------- | ------------ | -------------------------------------- |
+| `caddy`    | official `caddy`              | ports 80/443 | reverse proxy + automatic HTTPS        |
+| `web`      | built from `job-hunt-ui`      | internal     | serves the static `dist/` bundle       |
+| `api`      | built from `job-hunt-api`     | internal     | Hono server (`npm start`, long-lived)  |
+| `postgres` | official `postgres:16-alpine` | internal     | volume-backed — the one stateful piece |
 
 Caddy routes by `Host` header:
 
-- `jobhunt.example.com`     → `web` (static files)
+- `jobhunt.example.com` → `web` (static files)
 - `api.jobhunt.example.com` → `api:3000`
 
 Containers address each other by **Compose service name** — not `localhost`,
@@ -118,7 +118,7 @@ that assume it — not enough to outweigh the above.
 4. SSH to the VPS (private key from GitHub repo/Environment secrets).
 5. On the VPS: `docker compose pull <service> && docker compose up -d <service>`.
 6. **API only —** run `npm run db:migrate` against the production database as a
-   release step, *before* the new container starts taking traffic.
+   release step, _before_ the new container starts taking traffic.
 7. Caddy needs no change: same service name, same internal port.
 8. **Post-deploy health check** — curl `https://api.jobhunt.<domain>/health`
    (and the web root); if either isn't `200`, fail the pipeline and alert.
@@ -146,7 +146,7 @@ radius to justify standing up and maintaining the other two; the three-tier
 model is recorded here as what this would grow into, not something built now.
 
 | Env        | Where   | Deploys on      | Database              |
-| ---------- | ------- | --------------- | -------------------- |
+| ---------- | ------- | --------------- | --------------------- |
 | production | the VPS | merge to `main` | `job_hunt` on the VPS |
 
 ### Branch protection
