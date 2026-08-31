@@ -1,6 +1,9 @@
 # job-hunt-api
 
-![CI](https://github.com/danilomsilva/job-hunt-api/actions/workflows/ci.yml/badge.svg)
+[![CI](https://github.com/danilomsilva/job-hunt-api/actions/workflows/ci.yml/badge.svg)](https://github.com/danilomsilva/job-hunt-api/actions/workflows/ci.yml)
+![TypeScript strict](https://img.shields.io/badge/TypeScript-strict-3178c6?logo=typescript&logoColor=white)
+![Tests](https://img.shields.io/badge/tests-49%20passing-brightgreen)
+![OpenAPI](https://img.shields.io/badge/docs-OpenAPI-6BA539?logo=openapiinitiative&logoColor=white)
 
 A REST API for tracking job applications through the hiring pipeline — auth with
 rotating/revocable refresh tokens, ownership-scoped CRUD, filtering/sorting/pagination,
